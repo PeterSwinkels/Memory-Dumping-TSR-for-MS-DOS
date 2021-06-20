@@ -1,4 +1,4 @@
-; Memory Dumping TSR for MS-DOS v1.00 - By: Peter Swinkels, ***2021***
+; Memory Dumping TSR for MS-DOS v1.01 - By: Peter Swinkels, ***2021***
 ORG 0x0100                ; Indicates that all relative pointers to data are moved forward by 0x0100 bytes.
 
 RedirectedFrom EQU 0x08   ; Defines the interrupt to be redirected.
