@@ -1,4 +1,4 @@
-; Memory Dumping TSR for MS-DOS v1.02 - By: Peter Swinkels, ***2021***
+; Memory Dumping TSR for MS-DOS v1.03 - By: Peter Swinkels, ***2021***
 ORG 0x0100                ; Indicates that all relative pointers to data are moved forward by 0x0100 bytes.
 
 JMP Main
@@ -8,7 +8,7 @@ PUSHA                     ; Saves the registers.
 PUSH DS                   ;
 PUSH ES
 
-PUSH FS                   ; Restores the data segment register.
+PUSH CS                   ; Restores the data segment register.
 POP DS                    ;
 
 %INCLUDE "Memdump.asm"    ; Includes the TSR's main body.
@@ -38,9 +38,6 @@ JNE IsActive              ;
 MOV AH, 0x35              ; Retrieves vector the vector for the interrupt to be redirected.
 MOV AL, RedirectedFrom    ;
 INT 0x21                  ;
-
-MOV AX, DS                ; Saves the data segment register.
-MOV FS, AX                ;
 
 MOV DX, BX                ; Places the retrieved vector at another interrupt.
 PUSH ES                   ;

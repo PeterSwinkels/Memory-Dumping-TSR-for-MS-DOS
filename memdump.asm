@@ -1,24 +1,29 @@
-IN AL, 0x60           ; Skips memory dumping unless the F12 key is being pressed.
-CMP AL, 0x58          ;
-JNE Done              ;
+IN AL, 0x60             ; Skips memory dumping unless the F12 key is being pressed.
+CMP AL, 0x58            ;
+JNE Done                ;
 
-MOV AH, 0x3C          ; Creates the output file.
-MOV CX, 0x00          ;
-LEA DX, OutputFile    ;
-INT 0x21              ;
-JC Done               ;
+CMP BYTE [Busy], 0x00   ; Check whether a dump is already in progress.
+JNE Done                ;
 
-MOV BX, AX            ; Closes the newly created output file.
-MOV AH, 0x3E          ;
-INT 21h               ;
-JC Done               ;
+MOV BYTE [Busy], 0x01   ; Sets the flag indicating a dump is progress.
 
-MOV AX, 0x3D01        ; Opens the output file for writing.
-LEA DX, OutputFile    ;
-INT 0x21              ;
-JC Done               ;
+MOV AH, 0x3C            ; Creates the output file.
+MOV CX, 0x00            ;
+LEA DX, OutputFile      ;
+INT 0x21                ;
+JC Done                 ;
 
-MOV BX, AX            ; Retrieves the filehandle.
+MOV BX, AX              ; Closes the newly created output file.
+MOV AH, 0x3E            ;
+INT 21h                 ;
+JC Done                 ;
+
+MOV AX, 0x3D01          ; Opens the output file for writing.
+LEA DX, OutputFile      ;
+INT 0x21                ;
+JC Done                 ;
+
+MOV BX, AX              ; Retrieves the filehandle.
 
 MOV WORD [MemorySegment], 0x0000    ; Sets the first memory block.
 
@@ -51,8 +56,9 @@ MOV AH, 0x3E          ; Closes the output file.
 INT 21h               ;
 JMP Done
 
-OutputFile DB "MemDump.dat", 0x00
+Busy DB 0x00
 MemorySegment DW 0x0000
+OutputFile DB "MemDump.dat", 0x00
 
 Done:
-
+MOV BYTE [Busy], 0x00   ; Clears the flag indicating a dump is progress.
