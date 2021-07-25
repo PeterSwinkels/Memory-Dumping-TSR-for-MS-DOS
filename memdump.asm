@@ -1,3 +1,14 @@
+; Memory Dumping module for TSR.
+
+MOV WORD BX, [CEInDOS_Offset]    ; Skips memory dumping if either the critical error or InDOS flag are set.
+MOV WORD ES, [CEInDOS_Segment]   ;
+ES                               ;
+CMP BYTE [BX - 0x01], 0x00       ;
+JNE Done                         ;
+ES                               ;
+CMP BYTE [BX], 0x00              ;
+JNE Done                         ;
+
 IN AL, 0x60             ; Skips memory dumping unless the F12 key is being pressed.
 CMP AL, 0x58            ;
 JNE Done                ;
@@ -57,6 +68,8 @@ INT 21h               ;
 JMP Done
 
 Busy DB 0x00
+CEInDOS_Offset DW 0x0000
+CEInDOS_Segment DW 0x0000
 MemorySegment DW 0x0000
 OutputFile DB "MemDump.dat", 0x00
 
