@@ -11,12 +11,12 @@ JMP NEAR Main             ; Jumps to the main entry point.
 TSR:
 PUSHA                     ; Saves the registers.
 PUSH DS                   ;
-PUSH ES
+PUSH ES                   ;
 
 PUSH CS                   ; Restores the data segment register.
 POP DS                    ;
 
-%INCLUDE "Memdump.asm"    ; Includes the TSR's main body.
+%INCLUDE "Memdump.asm"    ; Includes the TSR's code file.
 
 POP ES                    ; Restores the registers.
 POP DS                    ;
