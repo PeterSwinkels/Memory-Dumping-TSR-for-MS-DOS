@@ -13,13 +13,13 @@ IN AL, 0x60             ; Skips memory dumping unless the F12 key is being press
 CMP AL, 0x58            ;
 JNE Done                ;
 
-CMP BYTE [Busy], 0x00   ; Check whether a dump is already in progress.
+CMP BYTE [Busy], 0x00   ; Checks whether a dump is already in progress.
 JNE Done                ;
 
-MOV BYTE [Busy], 0x01   ; Sets the flag indicating a dump is progress.
+MOV BYTE [Busy], 0x01   ; Sets the flag indicating a dump is in progress.
 
 MOV AH, 0x3C            ; Creates the output file.
-MOV CX, 0x00            ;
+XOR CX, CX              ;
 LEA DX, OutputFile      ;
 INT 0x21                ;
 JC Done                 ;
@@ -48,7 +48,7 @@ Dump:
 
    MOV AH, 0x40                ; Writes the memory block to the output file.
    MOV CX, 0xFFFF              ;
-   MOV DX, 0x0000              ;
+   XOR DX, DX                  ;
    INT 0x21                    ;
    JC Done                     ;
 
@@ -60,12 +60,12 @@ Dump:
    ADD AX, 0x1000              ; Moves to the next memory block.
    ES                          ;
    MOV [MemorySegment], AX     ;
-JMP Dump
+JMP SHORT Dump                 ;
 
 DumpFinished:
 MOV AH, 0x3E          ; Closes the output file.
 INT 21h               ;
-JMP Done
+JMP SHORT Done        ;
 
 Busy DB 0x00
 CEInDOS_Offset DW 0x0000
