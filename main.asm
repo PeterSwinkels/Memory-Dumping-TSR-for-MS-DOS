@@ -84,4 +84,8 @@ INT 0x21                  ;
 
 TSR_Activate_Msg DB "Already active!", 0x0D, 0x0A, "$"
 TSR_Activated_Msg DB "Activated.", 0x0D, 0x0A, "$"
-TSR_Start_Msg DB "Memory Dumping TSR for MS-DOS v1.06 - by: Peter Swinkels, ***2021***", 0x0D, 0x0A, "$"
+TSR_Start_Msg DB "Memory Dumping TSR for MS-DOS v1.07 - by: Peter Swinkels, ***2021***"
+DB 0x0D, 0x0A
+DB "F12 = Dump conventional memory."
+DB 0x0D, 0x0A
+DB "$"
