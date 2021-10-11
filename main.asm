@@ -3,7 +3,8 @@ ALIGN 0x01, DB 0x90     ; Defines alignment.
 BITS 16                 ; Defines the segment size used by this program.
 ORG 0x0100              ; Indicates that all relative pointers to data are moved forward by 0x0100 bytes.
 
-TSR_VECTOR EQU 0x08       ; Defines the interrupt to be redirected.
+REDIRECTED_FROM EQU 0x08  ; Defines the interrupt to be redirected.
+REDIRECTED_TO EQU 0xFF    ; Defines the redirected interrupt's new vector.
 
 JMP NEAR Main             ; Jumps to the main entry point.
 
@@ -17,13 +18,11 @@ POP DS                    ;
 
 %INCLUDE "Memdump.asm"    ; Includes the TSR's code file.
 
-PUSHF                     ; Calls the redirected interrupt.
-CS                        ;
-CALL FAR [Redirected]     ;
-
 POP ES                    ; Restores the registers.
 POP DS                    ;
 POPA                      ;
+
+INT REDIRECTED_TO         ; Calls the redirected interrupt.
 
 IRET                      ; Returns.
 EndTSR:
@@ -33,28 +32,36 @@ MOV AH, 0x09              ; Displays the TSR "start" message.
 MOV DX, TSR_Start_Msg     ;
 INT 0x21                  ;
 
-MOV AL, [IsActiveFlag]    ; Checks whether this TSR is already active.
-CMP AL, 0x00              ;
+MOV AH, 0x35              ; Checks whether this TSR is already active by checking for a redirected interrupt.
+MOV AL, REDIRECTED_TO     ;
+INT 0x21                  ;
+MOV AX, ES                ;
+CMP AX, 0x0000            ;
 JNE IsActive              ;
-
-MOV BYTE [IsActiveFlag], 0x01  ; Sets this TSR as being active.
+    CMP BX, 0x0000        ;
+    JNE IsActive          ;
 
 MOV AH, 0x34                ; Retrieves the address of the critical error and InDOS flags.
 INT 0x21                    ;
 MOV [CEInDOS_Offset], BX    ;
 MOV [CEInDOS_Segment], ES   ;
 
-MOV AH, 0x35                  ; Retrieves vector the vector for the interrupt to be redirected.
-MOV AL, TSR_VECTOR            ;
-INT 0x21                      ;
-MOV [Redirected_Segment], ES  ;
-MOV [Redirected_Offset], BX   ;
+MOV AH, 0x35              ; Retrieves vector the vector for the interrupt to be redirected.
+MOV AL, REDIRECTED_FROM   ;
+INT 0x21                  ;
+
+MOV DX, BX                ; Places the retrieved vector at another interrupt.
+PUSH ES                   ;
+POP DS                    ;
+MOV AH, 0x25              ;
+MOV AL, REDIRECTED_TO     ;
+INT 0x21                  ;
 
 PUSH CS                   ; Sets this TSR's interrupt vector.
 POP DS                    ;
 MOV DX, TSR               ;
 MOV AH, 0x25              ;
-MOV AL, TSR_VECTOR        ;
+MOV AL, REDIRECTED_FROM   ;
 INT 0x21                  ;
 
 MOV AH, 0x09              ; Displays the TSR "activated" message.
@@ -75,13 +82,9 @@ INT 0x21                  ;
 MOV AH, 0x4C              ; Quits if the TSR is already active.
 INT 0x21                  ;
 
-IsActiveFlag DB 0x00
-Redirected:
-Redirected_Offset DW 0x0000
-Redirected_Segment DW 0x0000
 TSR_Activate_Msg DB "Already active!", 0x0D, 0x0A, "$"
 TSR_Activated_Msg DB "Activated.", 0x0D, 0x0A, "$"
-TSR_Start_Msg DB "Memory Dumping TSR for MS-DOS v1.08 - by: Peter Swinkels, ***2021***"
+TSR_Start_Msg DB "Memory Dumping TSR for MS-DOS v1.07 - by: Peter Swinkels, ***2021***"
 DB 0x0D, 0x0A
 DB "F12 = Dump conventional memory."
 DB 0x0D, 0x0A
