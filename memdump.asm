@@ -26,7 +26,7 @@ JC Done                 ;
 
 MOV BX, AX              ; Closes the newly created output file.
 MOV AH, 0x3E            ;
-INT 21h                 ;
+INT 0x21                ;
 JC Done                 ;
 
 MOV AX, 0x3D01          ; Opens the output file for writing.
@@ -64,7 +64,7 @@ JMP SHORT Dump                 ;
 
 DumpFinished:
 MOV AH, 0x3E          ; Closes the output file.
-INT 21h               ;
+INT 0x21              ;
 JMP SHORT Done        ;
 
 Busy DB 0x00
