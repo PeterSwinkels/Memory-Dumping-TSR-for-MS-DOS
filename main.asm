@@ -70,8 +70,8 @@ INT 0x21                  ;
 
 MOV AX, 0x3100            ; Terminates and stays resident.
 MOV DX, EndTSR            ;
-ADD DX, 0x0F              ;
-SHR DX, 0x04              ;
+ADD DX, 0x000F            ;
+SHR DX, 0x0004            ;
 INT 0x21                  ;
 
 IsActive:                 ; 
